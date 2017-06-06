@@ -1,7 +1,7 @@
 # shrinkfuzz
 
 shrinkfuzz is a small prototype fuzzer that works on the principle that
-[test case reduction is surprisingly good at fuzzing](https://blog.regehr.org/archives/1284>).
+[test case reduction is surprisingly good at fuzzing](https://blog.regehr.org/archives/1284).
 
 
 ## Usage
