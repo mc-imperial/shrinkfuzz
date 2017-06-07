@@ -118,7 +118,8 @@ def main(command, input, output, corpus, timeout, debug):
         else:
             if output_contents not in seen_contents:
                 gallery_file = os.path.join(
-                    gallery, "%s:%s" % (output_contents, output))
+                    gallery, "%s:%s" % (
+                    output_contents, os.path.basename(output)))
                 shutil.copy(output, gallery_file)
                 seen_contents.add(output_contents)
         results.add("output:%s" % (output_contents,))
