@@ -139,6 +139,7 @@ def main(command, input, output, corpus, timeout, debug):
             except FileNotFoundError:
                 pass
             os.link(p, target)
+            assert os.path.exists(target)
 
     def unstable_callback(s):
         record_in(unstable, s)
