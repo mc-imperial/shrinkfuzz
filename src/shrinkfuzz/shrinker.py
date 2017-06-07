@@ -122,7 +122,6 @@ class Shrinker(object):
             k = find_large_n(
                 len(target) - i, lambda k: deletable(i, i + k))
             if k > 0:
-                removed = target[i:i+k]
                 target = target[:i] + target[i + k:]
             i += 1
         return target
