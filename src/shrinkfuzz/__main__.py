@@ -7,6 +7,7 @@ import hashlib
 import sys
 import time
 import binascii
+import shutil
 
 
 def signal_group(sp, signal):
@@ -54,7 +55,8 @@ def main(command, input, output, corpus, timeout, debug):
     timeouts = os.path.join(corpus, "timeouts")
     seeds = os.path.join(corpus, "seeds")
     exemplars = os.path.join(corpus, "exemplars")
-    for f in [crashes, seeds, unstable, timeouts, exemplars]: 
+    gallery = os.path.join(corpus, "gallery")
+    for f in [crashes, seeds, unstable, timeouts, exemplars, gallery]:
         try:
             os.makedirs(f)
         except FileExistsError:
@@ -71,6 +73,8 @@ def main(command, input, output, corpus, timeout, debug):
     def record_in(f, s):
         with open(os.path.join(f, hashed_name(s)), 'wb') as o:
             o.write(s)
+
+    seen_contents = set()
 
     def classify(s):
         nonlocal first_call
@@ -111,6 +115,12 @@ def main(command, input, output, corpus, timeout, debug):
                 output_contents = hashlib.sha1(i.read()).hexdigest()[:8]
         except FileNotFoundError:
             output_contents = None
+        else:
+            if output_contents not in seen_contents:
+                gallery_file = os.path.join(
+                    gallery, "%s:%s" % (output_contents, output))
+                shutil.copy(output, gallery_file)
+                seen_contents.add(output_contents)
         results.add("output:%s" % (output_contents,))
         return results
         
