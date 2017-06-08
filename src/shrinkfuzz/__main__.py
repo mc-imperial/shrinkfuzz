@@ -128,8 +128,10 @@ def main(command, input, output, corpus, timeout, debug):
     with open(input, 'rb') as i:
         initial = i.read()
 
-    with open(os.path.join(corpus, name_for('initial')), 'wb') as o:
-        o.write(initial)
+    save_initial = os.path.join(corpus, name_for('initial'))
+    if not os.path.exists(save_initial):
+        with open(save_initial, 'wb') as o:
+            o.write(initial)
 
     def corpus_path(s):
         return os.path.join(seeds, hashed_name(s))
