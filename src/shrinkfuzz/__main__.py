@@ -63,7 +63,7 @@ def main(command, input, output, corpus, timeout, debug):
             pass
 
     def name_for(n):
-        return ':'.join((n, input))
+        return '-'.join((n, input))
 
     def hashed_name(s):
         return name_for(hashlib.sha1(s).hexdigest()[:8])
@@ -108,7 +108,7 @@ def main(command, input, output, corpus, timeout, debug):
         if sp.returncode < 0:
             record_in(crashes, s)
         results = set()
-        results.add("return:%d" % (sp.returncode,))
+        results.add("return-%d" % (sp.returncode,))
         
         try:
             with open(output, 'rb') as i:
@@ -118,11 +118,11 @@ def main(command, input, output, corpus, timeout, debug):
         else:
             if output_contents not in seen_contents:
                 gallery_file = os.path.join(
-                    gallery, "%s:%s" % (
+                    gallery, "%s-%s" % (
                     output_contents, os.path.basename(output)))
                 shutil.copy(output, gallery_file)
                 seen_contents.add(output_contents)
-        results.add("output:%s" % (output_contents,))
+        results.add("output-%s" % (output_contents,))
         return results
         
     with open(input, 'rb') as i:
