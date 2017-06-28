@@ -98,7 +98,10 @@ def main(command, input, output, corpus, timeout, debug):
             preexec_fn=os.setsid, shell=True,
         )
         try:
-            sp.communicate(timeout=timeout)
+            if timeout > 0:
+                sp.communicate(timeout=timeout)
+            else:
+                sp.communicate()
         except subprocess.TimeoutExpired:
             record_in(timeouts, s)
             return ()
