@@ -194,10 +194,12 @@ def main(command, input, output, corpus, timeout, debug, hash_size):
             continue
         if not shrinker.seen(s):
             os.unlink(f)
-            shrinker.classify(s)
+            result = shrinker.classify(s)
+            shrinker.debug(
+                "Reloading %r as %r" % (os.path.basename(f), result))
 
     shrinker.run()
 
 
 if __name__ == '__main__':
-    main.main(sys.args, standalone_mode=False)
+    main.main()
