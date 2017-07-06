@@ -48,7 +48,10 @@ def interrupt_wait_and_kill(sp):
 @click.option('--debug', default=False, is_flag=True, help=(
     'Emit (extremely verbose) debug output while shrinking'
 ))
-def main(command, input, output, corpus, timeout, debug):
+@click.option('--hash-size', default=8, help=(
+    'Size of the hash to use for considering two values to be equal'
+))
+def main(command, input, output, corpus, timeout, debug, hash_size):
 
     crashes = os.path.join(corpus, "crashes")
     unstable = os.path.join(corpus, "unstable")
@@ -108,23 +111,23 @@ def main(command, input, output, corpus, timeout, debug):
         finally:
             interrupt_wait_and_kill(sp)
 
-        if sp.returncode < 0:
+        if sp.returncode < 0 or sp.returncode > 127:
             record_in(crashes, s)
+            return ()
         results = set()
         results.add("return-%d" % (sp.returncode,))
         
         try:
             with open(output, 'rb') as i:
-                output_contents = hashlib.sha1(i.read()).hexdigest()[:8]
+                output_contents = hashlib.sha1(
+                    i.read()).hexdigest()[:hash_size]
         except FileNotFoundError:
             output_contents = None
         else:
-            if output_contents not in seen_contents:
-                gallery_file = os.path.join(
-                    gallery, "%s-%s" % (
-                    output_contents, os.path.basename(output)))
-                shutil.copy(output, gallery_file)
-                seen_contents.add(output_contents)
+            gallery_file = os.path.join(
+                gallery, "%s-%s" % (
+                output_contents, os.path.basename(output)))
+            shutil.copy(output, gallery_file)
         results.add("output-%s" % (output_contents,))
         return results
         
@@ -144,7 +147,10 @@ def main(command, input, output, corpus, timeout, debug):
             o.write(s)
 
     def removed(s):
-        os.unlink(corpus_path(s))
+        try:
+            os.unlink(corpus_path(s))
+        except FileNotFoundError:
+            pass
 
     def best_changed(b, s):
         p = corpus_path(s)
