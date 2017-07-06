@@ -160,11 +160,8 @@ class Shrinker(object):
                 assert len(t) < len(target)
                 if self.seen(t):
                     return False
-                markers = self.classify(t)
-                for o in objectives:
-                    if o in markers:
-                        return True
-                return False
+                self.classify(t)
+                return t in self.__best
 
             target = self.shrink(target, predicate)
 
