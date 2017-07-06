@@ -98,13 +98,15 @@ class Shrinker(object):
             if not available:
                 break
             c = bytes([min(available, key=counts.__getitem__)])
-            self.debug("Partitioning by %r" % (c,))
+            partition = partition_on(target, c)
+            self.debug("Partitioning by %r into %d parts" % (c, len(partition)))
             used_alphabet.add(c[0])
-            partition = target.split(c)
             partition = self.shrink_sequence(
-                partition, lambda ls: predicate(c.join(ls))
+                partition, lambda ls: predicate(partition_to_string(
+                    target, ls
+                ))
             )
-            target = c.join(partition)
+            target = partition_to_string(target, partition)
 
         self.debug("Partitioning bytewise")
         return self.shrink_sequence(target, predicate)
@@ -184,3 +186,31 @@ def find_large_n(max_n, f):
         else:
             hi = mid
     return lo
+
+
+def partition_on(string, c):
+    if not string:
+        return []
+    if isinstance(c, bytes):
+        assert len(c) == 1
+        c = c[0]
+    partition = [[0, 1]]
+    for i, d in enumerate(string):
+        if i == 0:
+            continue
+        if d != c:
+            partition[-1][-1] = i + 1
+        else:
+            partition.append([i, i + 1])
+    assert partition[0][0] == 0
+    assert partition[-1][-1] == len(string)
+    for x, y in zip(partition, partition[1:]):
+        assert x[1] == y[0]
+    return partition
+
+
+def partition_to_string(string, partition):
+    result = bytearray()
+    for u, v in partition:
+        result.extend(string[u:v])
+    return bytes(result)
