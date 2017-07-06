@@ -101,6 +101,13 @@ class Shrinker(object):
             if not available:
                 break
             c = bytes([min(available, key=counts.__getitem__)])
+
+            replaced = replace_runs(target, c)
+            if replaced != target:
+                self.debug("Replacing runs of %r" % (c,))
+                if predicate(replaced):
+                    target = replaced
+
             partition = partition_on(target, c)
             self.debug("Partitioning by %r into %d parts" % (c, len(partition)))
             used_alphabet.add(c[0])
@@ -216,4 +223,19 @@ def partition_to_string(string, partition):
     result = bytearray()
     for u, v in partition:
         result.extend(string[u:v])
+    return bytes(result)
+
+
+def replace_runs(string, c):
+    if isinstance(c, bytes):
+        assert len(c) == 1
+        c = c[0]
+    result = bytearray()
+    for d in string:
+        if (
+            d != c or
+            not result or
+            result[-1] != c
+        ):
+            result.append(d)
     return bytes(result)
