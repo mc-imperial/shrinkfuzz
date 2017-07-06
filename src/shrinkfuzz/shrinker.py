@@ -82,6 +82,8 @@ class Shrinker(object):
             self.__corpus.append(s)
             self.__add_callback(s)
             self.__change_callback(self.__best[s], s)
+        else:
+            self.__best.pop(s)
         return set(result) 
 
     def seen(self, s):
