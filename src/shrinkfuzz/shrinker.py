@@ -34,7 +34,8 @@ class Shrinker(object):
 
     def debug(self, *args, **kwargs):
         if self.__debug:
-            print(*args, **kwargs, file=sys.stderr)
+            kwargs.setdefault('file', sys.stderr)
+            print(*args, **kwargs)
 
     def classify(self, s):
         assert not self.seen(s)
