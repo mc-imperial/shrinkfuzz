@@ -77,7 +77,8 @@ def main(command, input, output, corpus, timeout, debug, hash_size):
         with open(os.path.join(f, hashed_name(s)), 'wb') as o:
             o.write(s)
 
-    seen_contents = set()
+    consecutive_timeouts = 0
+
 
     def classify(s):
         nonlocal first_call
@@ -95,6 +96,8 @@ def main(command, input, output, corpus, timeout, debug, hash_size):
         with open(input, 'wb') as o:
             o.write(s)
 
+        nonlocal consecutive_timeouts
+
         sp = subprocess.Popen(
             command, stdout=target, stdin=target,
             stderr=target, universal_newlines=False,
@@ -107,9 +110,16 @@ def main(command, input, output, corpus, timeout, debug, hash_size):
                 sp.communicate()
         except subprocess.TimeoutExpired:
             record_in(timeouts, s)
+            consecutive_timeouts += 1
+            if consecutive_timeouts > 50:
+                click.echo(
+                    "Too many timeouts - we've probably broken something."
+                    " Aborting.", file=sys.stderr)
+                sys.exit(1)
             return ()
         finally:
             interrupt_wait_and_kill(sp)
+        consecutive_timeouts = 0
 
         if sp.returncode < 0 or sp.returncode > 127:
             record_in(crashes, s)
