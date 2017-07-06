@@ -174,13 +174,16 @@ class Shrinker(object):
 
 
 def find_large_n(max_n, f):
-    if not f(1):
-        return 0
-    lo = 1
-    hi = 2
+    for i in range(1, min(9, max_n + 1)):
+        if not f(i):
+            return i - 1
+    if max_n <= 8:
+        return max_n
+    lo = 8
+    hi = 9
     while hi <= max_n and f(hi):
+        hi = lo * 2
         lo = hi
-        hi *= 2
     if hi > max_n:
         if f(max_n):
             return max_n
